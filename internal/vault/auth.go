@@ -19,7 +19,7 @@ import (
 func (s Server) authFunc(ctx context.Context) (context.Context, error) {
 	// skip authorization for health check
 	m, ok := grpc.Method(ctx)
-	if m == "/fireblaze.vault.v1.VaultCard/HealthCheck" && ok {
+	if m == "/fireblaze.vault.v1.Card/HealthCheck" && ok {
 		return ctx, nil
 	}
 
