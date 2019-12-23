@@ -10,13 +10,14 @@ import (
 	"os"
 
 	stackdriver "github.com/TV4/logrus-stackdriver-formatter"
-	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_validator "github.com/grpc-ecosystem/go-grpc-middleware/validator"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/lfaoro/pkg/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
+
+	grpc_logrus "github.com/lfaoro/spark/pkg/interceptor/logging/logrus"
 
 	"github.com/lfaoro/spark/internal"
 	pb "github.com/lfaoro/spark/proto/api/user"
@@ -80,11 +81,11 @@ func (s Server) ServeGRPC(grpcPort string) error {
 	// lmt := newVaultLimiter(time.Minute, 5, 1, time.Second*10)
 	srv := grpc.NewServer(grpc.UnaryInterceptor(
 		grpc_middleware.ChainUnaryServer(
+			// grpc_ratelimt.UnaryServerInterceptor(lmt),
+			grpc_validator.UnaryServerInterceptor(),
 			grpc_logrus.UnaryServerInterceptor(&logrus.Entry{
 				Logger: sdLog,
 			}),
-			// grpc_ratelimt.UnaryServerInterceptor(lmt),
-			grpc_validator.UnaryServerInterceptor(),
 			grpc_opentracing.UnaryServerInterceptor(),
 		)))
 
