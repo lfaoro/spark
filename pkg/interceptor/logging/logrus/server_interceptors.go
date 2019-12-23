@@ -1,4 +1,6 @@
-// Copyright (c) Improbable Worlds Ltd, All Rights Reserved
+// Copyright (c) 2019 Leonardo Faoro. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
 package grpc_logrus
 
@@ -7,6 +9,7 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	er "cloud.google.com/go/errorreporting"
@@ -33,6 +36,10 @@ func UnaryServerInterceptor(entry *logrus.Entry, opts ...Option) grpc.UnaryServe
 		newCtx := newLoggerForCall(ctx, entry, info.FullMethod, startTime)
 
 		resp, err := handler(newCtx, req)
+
+		if strings.Contains(info.FullMethod, "HealthCheck") && err == nil {
+			return resp, err
+		}
 
 		if !o.shouldLog(info.FullMethod, err) {
 			return resp, err
