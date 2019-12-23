@@ -73,7 +73,6 @@ func (s Server) PutCard(ctx context.Context, r *pb.PutCardRequest) (w *pb.PutCar
 		case pb.SERVICE_METADATA:
 			w.Metadata = s.iinLookup(r.Number)
 		// s.billing.Inc(billing.Metadata)
-
 		case pb.SERVICE_RISK_CHECK:
 			w.Risk = calculateRisk(r)
 		// s.billing.Inc(billing.Risk)
@@ -99,37 +98,6 @@ func (s Server) PutCard(ctx context.Context, r *pb.PutCardRequest) (w *pb.PutCar
 	metricStoredCards.Inc()
 
 	return w, nil
-}
-
-func (s Server) enabledServices(ctx context.Context) map[pb.SERVICE]bool {
-	services := make(map[pb.SERVICE]bool)
-
-	id := projectIDFrom(ctx)
-	if id == 0 {
-		return services
-	}
-
-	project, err := s.db.Project.Get(ctx, id)
-	if err != nil {
-		log.Println(err)
-		return services
-	}
-
-	services[pb.SERVICE_TOKENIZATION] = project.Tokenization
-	services[pb.SERVICE_METADATA] = project.Metadata
-	services[pb.SERVICE_RISK_CHECK] = project.Risk
-	services[pb.SERVICE_MPI_CHECK] = project.Mpi
-
-	return services
-}
-
-func projectIDFrom(ctx context.Context) int {
-	id, ok := internal.GetValueFrom(ctx, "project_id").(int)
-	if !ok {
-		log.Println("failed to get project_id from context")
-		return 0
-	}
-	return id
 }
 
 func (s Server) GetCard(ctx context.Context, r *pb.GetCardRequest) (w *pb.GetCardResponse, err error) {
@@ -272,7 +240,7 @@ func cardExpiresOn(r *pb.PutCardRequest) *timestamp.Timestamp {
 
 func userAgentsFrom(ctx context.Context) string {
 	md, _ := metadata.FromIncomingContext(ctx)
-	return strings.Join(md.Get("User-Agent"), " ")
+	return strings.Join(md.Get("grpcgateway-user-agent"), " ")
 }
 
 func ipFrom(ctx context.Context) string {
@@ -347,4 +315,35 @@ func hashCard(r *pb.PutCardRequest) string {
 
 func newToken() string {
 	return "tok_" + uuid.New().String()
+}
+
+func (s Server) enabledServices(ctx context.Context) map[pb.SERVICE]bool {
+	services := make(map[pb.SERVICE]bool)
+
+	id := projectIDFrom(ctx)
+	if id == 0 {
+		return services
+	}
+
+	project, err := s.db.Project.Get(ctx, id)
+	if err != nil {
+		log.Println(err)
+		return services
+	}
+
+	services[pb.SERVICE_TOKENIZATION] = project.Tokenization
+	services[pb.SERVICE_METADATA] = project.Metadata
+	services[pb.SERVICE_RISK_CHECK] = project.Risk
+	services[pb.SERVICE_MPI_CHECK] = project.Mpi
+
+	return services
+}
+
+func projectIDFrom(ctx context.Context) int {
+	id, ok := internal.GetValueFrom(ctx, "project_id").(int)
+	if !ok {
+		log.Println("failed to get project_id from context")
+		return 0
+	}
+	return id
 }

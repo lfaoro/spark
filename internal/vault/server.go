@@ -133,7 +133,7 @@ func (s Server) ServeGRPC(grpcPort string) error {
 			grpc_opentracing.UnaryServerInterceptor(),
 		)))
 
-	pb.RegisterVaultCardServer(srv, s)
+	pb.RegisterCardServer(srv, s)
 
 	return srv.Serve(listener)
 }
@@ -157,7 +157,7 @@ func (s Server) ServeHTTP(httpPort, grpcPort string) error {
 	}
 
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	err := pb.RegisterVaultCardHandlerFromEndpoint(ctx, mux, grpcPort, opts)
+	err := pb.RegisterCardHandlerFromEndpoint(ctx, mux, grpcPort, opts)
 	if err != nil {
 		return err
 	}
