@@ -27,11 +27,13 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+
           envFrom:
               - configMapRef:
                   name: env-configmap
               - secretRef:
                   name: env-secrets
+
           ports:
             - name: http
               containerPort: 3001

@@ -40,6 +40,6 @@ spec:
               servicePort: {{ $svcPort }}
           - path: /v1/user
             backend:
-              serviceName: vault-user
-              servicePort: 80
+                serviceName: vault-user
+                servicePort: 3002
 {{- end }}

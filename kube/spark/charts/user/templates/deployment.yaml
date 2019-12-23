@@ -27,22 +27,22 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-              - name: GCP_PROJECTID
-                value: "fireblaze"
-              - name: GCP_LOCATIONID
-                value: "europe-west3"
-              - name: PG_CONNECTION
-                value: "host=10.105.0.3 port=5432 user=vault dbname=vault password=develop sslmode=disable"
+
+          envFrom:
+              - configMapRef:
+                    name: env-configmap
+              - secretRef:
+                    name: env-secrets
+
           ports:
-            - name: http
-              containerPort: 3002
-              protocol: TCP
-            - name: grpc
-              containerPort: 50052
-              protocol: TCP
+              - name: http
+                containerPort: 3002
+                protocol: TCP
+              - name: grpc
+                containerPort: 50052
+                protocol: TCP
           livenessProbe:
-            httpGet:
+              httpGet:
               path: /v1/user/health
               port: http
           readinessProbe:

@@ -32,7 +32,8 @@ securityContext: {}
 
 service:
  type: NodePort
- port: 80
+ port: 3001
+ grpcPort: 50051
 
 ingress:
  enabled: true
