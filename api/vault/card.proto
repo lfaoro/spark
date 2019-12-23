@@ -14,6 +14,20 @@ import "validate/validate.proto";
 
 // Manages payment cards.
 service Card {
+  // Returns app health status.
+  rpc HealthCheck (google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+       get: "/v1/card/health"
+    };
+  }
+
+  // Returns verbose app health status, including 3rd party services status.
+  rpc HealthCheckVerbose (google.protobuf.Empty) returns (HealthCheckResponse) {
+    option (google.api.http) = {
+       get: "/v1/card/health/verbose"
+    };
+  }
+
   // Encrypts and stores a card.
   rpc PutCard (PutCardRequest) returns (PutCardResponse) {
     option (google.api.http) = {
@@ -40,20 +54,6 @@ service Card {
   rpc GetCardMetadata (GetMetadataRequest) returns (CardMetadata) {
     option (google.api.http) = {
       get: "/v1/card/{token}/metadata"
-    };
-  }
-
-  // Returns app health status.
-  rpc HealthCheck (google.protobuf.Empty) returns (google.protobuf.Empty) {
-    option (google.api.http) = {
-       get: "/v1/card/health"
-    };
-  }
-
-  // Returns verbose app health status, including 3rd party services status.
-  rpc HealthCheckVerbose (google.protobuf.Empty) returns (HealthCheckResponse) {
-    option (google.api.http) = {
-       get: "/v1/card/health/verbose"
     };
   }
 }
