@@ -2,6 +2,9 @@ proto/
 ent/
 !ent/schema/
 
+secrets.yaml
+web/doc/*.json
+
 ideas/
 .idea
 .vscode
