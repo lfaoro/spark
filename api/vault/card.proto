@@ -1,0 +1,278 @@
+syntax = "proto3";
+package fireblaze.vault.v1;
+//option go_package = "github.com/lfaoro/spark;vault";
+option java_package = "io.fireblaze.vault";
+option java_outer_classname = "FireblazeVault";
+option java_multiple_files = true;
+option csharp_namespace = "Fireblaze.Vault.V1";
+option php_namespace = "Fireblaze\\Vault\\V1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+
+// Manages payment cards.
+service Card {
+  // Encrypts and stores a card.
+  rpc PutCard (PutCardRequest) returns (PutCardResponse) {
+    option (google.api.http) = {
+      post: "/v1/card"
+      body: "*"
+    };
+  }
+
+  // Gets card information.
+  rpc GetCard (GetCardRequest) returns (GetCardResponse) {
+    option (google.api.http) = {
+      get: "/v1/card/{token}"
+    };
+  }
+
+  // Deletes card data.
+  rpc DelCard (DelCardRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/card/{token}"
+    };
+  }
+
+  // Gets card metadata.
+  rpc GetCardMetadata (GetMetadataRequest) returns (CardMetadata) {
+    option (google.api.http) = {
+      get: "/v1/card/{token}/metadata"
+    };
+  }
+
+  // Returns app health status.
+  rpc HealthCheck (google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+       get: "/v1/card/health"
+    };
+  }
+
+  // Returns verbose app health status, including 3rd party services status.
+  rpc HealthCheckVerbose (google.protobuf.Empty) returns (HealthCheckResponse) {
+    option (google.api.http) = {
+       get: "/v1/card/health/verbose"
+    };
+  }
+}
+
+// Request message for `VaultCard.Get`
+message GetCardRequest {
+  // uuid associated with the card data.
+  string token = 1;
+}
+
+// Request message for `VaultCard.GetMetadata`
+message GetMetadataRequest {
+  // uuid associated with the card data.
+  string token = 1;
+}
+
+// Request message for `VaultCard.Del`
+message DelCardRequest {
+  // uuid associated with the card data.
+  string token = 1;
+}
+
+// Request message for `VaultCard.Put`
+message PutCardRequest {
+  string holder = 2; // Warren Buffet
+
+  // Payment card number
+  string number = 3; // 4242424242424242
+
+  uint32 exp_month = 4 [(validate.rules).uint32 = {gte:1, lte:12
+                       }];
+
+  uint32 exp_year = 5 [(validate.rules).uint32 = {gte:2019, lte:2030
+                      }];
+
+  uint32 cvc = 6 [(validate.rules).uint32 = {gte:100, lt:1000
+                 }];
+
+  // Card will be automatically deleted on the preferred date.
+  DELETE_CARD auto_delete = 7;
+
+  // Useful for AVS (Address Verification Service) one of the most widely
+  // used fraud prevention tools in card-not-present (CNP) transactions.
+  //
+  // An AVS check compares the billing address used in the transaction with
+  // the issuing bank’s address information for the cardholder.
+  Address billing_address = 8;
+
+  // Card retention policy.
+  enum DELETE_CARD {
+    NEVER = 0;
+    EXPIRY_DATE = 1;
+    THREE_MONTHS = 3;
+    SIX_MONTHS = 6;
+    TWELVE_MONTHS = 12;
+  }
+
+  message Address {
+    string street = 1;
+    string city = 2;
+    string state = 3;
+    string country = 4;
+    string postcode = 5;
+  }
+}
+
+message GetCardResponse {
+  string holder = 1;
+  string number = 2;
+  uint32 exp_month = 3;
+  uint32 exp_year = 4;
+  uint32 cvc = 5;
+
+  // Date upon this card expires.
+  google.protobuf.Timestamp expires_on = 6;
+
+  // Date on which this card will be deleted.
+  // The sweep process handles the deletion based on this field.
+  google.protobuf.Timestamp auto_delete_on = 7;
+
+  Address billing_address = 8;
+}
+
+// Response message for `VaultCard.Put`.
+message PutCardResponse {
+  // Unique non-reversible reference to the payment card.
+  string token = 1;
+
+  // Card hash, comprising of number, exp_year, exp_month.
+  // very useful to identify duplicate cards without compromising security.
+  string hash = 2;
+
+  // IP address which performed the request.
+  string request_ip = 3;
+
+  // User-Agent performing the request.
+  string user_agent = 4;
+
+  // date upon this card expires.
+  google.protobuf.Timestamp expires_on = 5;
+
+  // Date on which this card will be deleted.
+  // The sweep process handles the deletion based on this field.
+  google.protobuf.Timestamp auto_delete_on = 6;
+
+  // First six digits of the payment card number, also know as
+  // Issuer Identification Number (IIN), previously knows as
+  // Bank Identification Number (BIN).
+  //
+  // These digits, identify the institution that issued the card
+  // to the card holder.
+  uint32 first_six = 7;
+
+  // Last four digits on the card.
+  uint32 last_four = 8;
+
+  // Probability this payment card is fraud.
+  Risk risk = 9;
+
+  // Metadata is automatically extracted by the first six digits of the
+  // payment card number.
+  CardMetadata metadata = 10;
+
+  // 3DSecure allows transactions to be conducted in safety online, greatly
+  // reducing the risk of fraud and charge-backs.
+  //
+  // Verified by Visa
+  // The implementation of 3D Secure by Visa is called Verified by Visa.
+  //
+  // MasterCard Secure Code
+  // The implementation of 3D Secure by MasterCard is called Secure Code.
+  //
+  // Amex SafeKey
+  // The implementation of 3D Secure by Amex is called SafeKey.
+  //
+  // JCB J/Secure
+  // The implementation of 3D Secure by JCB is called J/Secure.
+  MPI mpi = 11;
+}
+
+// Public card information extracted using the IIN - first six digits
+// of the card number.
+message CardMetadata {
+  string scheme = 1;
+  string brand = 2;
+  string type = 3;
+  string currency = 4;
+  bool is_prepaid = 5;
+  Issuer issuer = 6;
+  string service_message = 7;
+
+  message Issuer {
+    string name = 1;
+    string url = 2;
+    string phone = 3;
+    string city = 4;
+    string country = 5;
+    // alpha2 country code
+    string country_code = 6;
+    float latitude = 7;
+    float longitude = 8;
+    string map = 9;
+  }
+}
+
+message Address {
+  string street = 1;
+  string city = 2;
+  string state = 3;
+  string country = 4;
+  string postcode = 5;
+}
+
+// The mpi service determines if the card is enrolled with 3DSecure.
+message MPI {
+  // True if card is enrolled with an ACS.
+  bool enrolled = 1;
+  // Electronic Commerce Indicator
+  int32 eci = 2;
+  // Access Control Server URL
+  string acs = 3;
+  // Payment Authentication Request
+  string par = 4;
+}
+
+message Risk {
+  float score = 1;
+  string provider = 2;
+  repeated Trigger triggers = 3;
+
+  enum Trigger {
+    BLACKLIST = 0;
+    GEOLOCATION = 1;
+    FINGERPRINT = 3;
+  }
+}
+
+message HealthCheckResponse {
+  bool database = 1;
+  bool kms = 2;
+  bool mpi = 3;
+  bool risk = 4;
+  bool iin = 5;
+}
+
+enum SERVICE {
+  // All services will be run on the data provided.
+  NONE = 0;
+
+  // Encrypted and tokenized data storage will be excluded.
+  TOKENIZATION = 1;
+
+  // Payment card metadata retrieval will be excluded.
+  // ref: https://en.wikipedia.org/wiki/Card_Transaction_Data
+  METADATA = 2;
+
+  // Risk and fraud detection services will be excluded.
+  RISK_CHECK = 3;
+
+  // 3D Secure enrollment check will be excluded.
+  MPI_CHECK = 4;
+}

@@ -1,0 +1,468 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Fireblaze Vault",
+    "version": "v1.0.0"
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/card": {
+      "post": {
+        "summary": "Encrypts and stores a card.",
+        "operationId": "PutCard",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1PutCardResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1PutCardRequest"
+            }
+          }
+        ],
+        "tags": [
+          "VaultCard"
+        ]
+      }
+    },
+    "/v1/card/health": {
+      "get": {
+        "summary": "Returns app health status.",
+        "operationId": "HealthCheck",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          }
+        },
+        "tags": [
+          "VaultCard"
+        ]
+      }
+    },
+    "/v1/card/health/verbose": {
+      "get": {
+        "summary": "Returns verbose app health status, including 3rd party services status.",
+        "operationId": "HealthCheckVerbose",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1HealthCheckResponse"
+            }
+          }
+        },
+        "tags": [
+          "VaultCard"
+        ]
+      }
+    },
+    "/v1/card/{token}": {
+      "get": {
+        "summary": "Gets card information.",
+        "operationId": "GetCard",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetCardResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "description": "uuid associated with the card data.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "VaultCard"
+        ]
+      },
+      "delete": {
+        "summary": "Deletes card data.",
+        "operationId": "DelCard",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "description": "uuid associated with the card data.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "VaultCard"
+        ]
+      }
+    },
+    "/v1/card/{token}/metadata": {
+      "get": {
+        "summary": "Gets card metadata.",
+        "operationId": "GetCardMetadata",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CardMetadata"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "description": "uuid associated with the card data.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "VaultCard"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "CardMetadataIssuer": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "country_code": {
+          "type": "string",
+          "title": "alpha2 country code"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "float"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "float"
+        },
+        "map": {
+          "type": "string"
+        }
+      }
+    },
+    "PutCardRequestDELETE_CARD": {
+      "type": "string",
+      "enum": [
+        "NEVER",
+        "EXPIRY_DATE",
+        "THREE_MONTHS",
+        "SIX_MONTHS",
+        "TWELVE_MONTHS"
+      ],
+      "default": "NEVER",
+      "description": "Card retention policy."
+    },
+    "RiskTrigger": {
+      "type": "string",
+      "enum": [
+        "BLACKLIST",
+        "GEOLOCATION",
+        "FINGERPRINT"
+      ],
+      "default": "BLACKLIST"
+    },
+    "v1CardMetadata": {
+      "type": "object",
+      "properties": {
+        "scheme": {
+          "type": "string"
+        },
+        "brand": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "is_prepaid": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "issuer": {
+          "$ref": "#/definitions/CardMetadataIssuer"
+        },
+        "service_message": {
+          "type": "string"
+        }
+      },
+      "description": "Public card information extracted using the IIN - first six digits\nof the card number."
+    },
+    "v1GetCardResponse": {
+      "type": "object",
+      "properties": {
+        "holder": {
+          "type": "string"
+        },
+        "number": {
+          "type": "string"
+        },
+        "exp_month": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "exp_year": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "cvc": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "expires_on": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date upon this card expires."
+        },
+        "auto_delete_on": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date on which this card will be deleted.\nThe sweep process handles the deletion based on this field."
+        },
+        "billing_address": {
+          "$ref": "#/definitions/vaultv1Address"
+        }
+      }
+    },
+    "v1HealthCheckResponse": {
+      "type": "object",
+      "properties": {
+        "database": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "kms": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "mpi": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "risk": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "iin": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "v1MPI": {
+      "type": "object",
+      "properties": {
+        "enrolled": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "True if card is enrolled with an ACS."
+        },
+        "eci": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Electronic Commerce Indicator"
+        },
+        "acs": {
+          "type": "string",
+          "title": "Access Control Server URL"
+        },
+        "par": {
+          "type": "string",
+          "title": "Payment Authentication Request"
+        }
+      },
+      "description": "The mpi service determines if the card is enrolled with 3DSecure."
+    },
+    "v1PutCardRequest": {
+      "type": "object",
+      "properties": {
+        "holder": {
+          "type": "string"
+        },
+        "number": {
+          "type": "string",
+          "title": "Payment card number"
+        },
+        "exp_month": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "exp_year": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "cvc": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "auto_delete": {
+          "$ref": "#/definitions/PutCardRequestDELETE_CARD",
+          "description": "Card will be automatically deleted on the preferred date."
+        },
+        "billing_address": {
+          "$ref": "#/definitions/v1PutCardRequestAddress",
+          "description": "Useful for AVS (Address Verification Service) one of the most widely\nused fraud prevention tools in card-not-present (CNP) transactions.\n\nAn AVS check compares the billing address used in the transaction with\nthe issuing bank’s address information for the cardholder."
+        }
+      },
+      "title": "Request message for `VaultCard.Put`"
+    },
+    "v1PutCardRequestAddress": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "postcode": {
+          "type": "string"
+        }
+      }
+    },
+    "v1PutCardResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "description": "Unique non-reversible reference to the payment card."
+        },
+        "hash": {
+          "type": "string",
+          "description": "Card hash, comprising of number, exp_year, exp_month.\nvery useful to identify duplicate cards without compromising security."
+        },
+        "request_ip": {
+          "type": "string",
+          "description": "IP address which performed the request."
+        },
+        "user_agent": {
+          "type": "string",
+          "description": "User-Agent performing the request."
+        },
+        "expires_on": {
+          "type": "string",
+          "format": "date-time",
+          "description": "date upon this card expires."
+        },
+        "auto_delete_on": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date on which this card will be deleted.\nThe sweep process handles the deletion based on this field."
+        },
+        "first_six": {
+          "type": "integer",
+          "format": "int64",
+          "description": "First six digits of the payment card number, also know as\nIssuer Identification Number (IIN), previously knows as\nBank Identification Number (BIN).\n\nThese digits, identify the institution that issued the card\nto the card holder."
+        },
+        "last_four": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Last four digits on the card."
+        },
+        "risk": {
+          "$ref": "#/definitions/v1Risk",
+          "description": "Probability this payment card is fraud."
+        },
+        "metadata": {
+          "$ref": "#/definitions/v1CardMetadata",
+          "description": "Metadata is automatically extracted by the first six digits of the\npayment card number."
+        },
+        "mpi": {
+          "$ref": "#/definitions/v1MPI",
+          "description": "3DSecure allows transactions to be conducted in safety online, greatly\nreducing the risk of fraud and charge-backs.\n\nVerified by Visa\nThe implementation of 3D Secure by Visa is called Verified by Visa.\n\nMasterCard Secure Code\nThe implementation of 3D Secure by MasterCard is called Secure Code.\n\nAmex SafeKey\nThe implementation of 3D Secure by Amex is called SafeKey.\n\nJCB J/Secure\nThe implementation of 3D Secure by JCB is called J/Secure."
+        }
+      },
+      "description": "Response message for `VaultCard.Put`."
+    },
+    "v1Risk": {
+      "type": "object",
+      "properties": {
+        "score": {
+          "type": "number",
+          "format": "float"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "triggers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RiskTrigger"
+          }
+        }
+      }
+    },
+    "vaultv1Address": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "postcode": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

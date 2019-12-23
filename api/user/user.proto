@@ -1,0 +1,82 @@
+syntax = "proto3";
+package fireblaze.user.v1;
+//option go_package = "code.fireblaze.io/fb/spark;user";
+option java_package = "io.fireblaze.user";
+option java_outer_classname = "FireblazeUser";
+option java_multiple_files = true;
+option csharp_namespace = "Fireblaze.User.V1";
+option php_namespace = "Fireblaze\\User\\V1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+service User {
+  // Returns app health status.
+  rpc HealthCheck (google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+       get: "/v1/user/health"
+    };
+  }
+
+
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {
+    option (google.api.http) = {
+      post: "/v1/user"
+      body: "*"
+    };
+  }
+
+
+  rpc AuthUser (AuthUserRequest) returns (AuthUserResponse) {
+    option (google.api.http) = {
+      post: "/v1/user/auth"
+      body: "*"
+    };
+  }
+
+  //  rpc CreateProject (CreateProjectRequest) returns (CreateProjectResponse) {
+  //    option (google.api.http) = {
+  //      post: "/v1/user/{id}/project"
+  //      body: "*"
+  //    };
+  //  }
+
+  //  rpc CreateKey (CreateProjectKeyRequest) returns (CreateProjectKeyResponse) {
+  //    option (google.api.http) = {
+  //      post: "/v1/user/{id}/{project_id}/apikey"
+  //      body: "*"
+  //    };
+  //  }
+
+}
+
+message CreateUserRequest {
+  string email = 1;
+  string password = 2;
+  string project = 3;
+}
+
+message CreateUserResponse {
+  bool disabled = 2;
+  string api_key = 3;
+  int32 project_id = 4;
+}
+
+message CreateProjectRequest {
+}
+message CreateProjectResponse {
+}
+
+message CreateProjectKeyRequest {
+}
+message CreateProjectKeyResponse {
+}
+
+message AuthUserRequest {
+  string key = 1;
+}
+
+message AuthUserResponse {
+  bool authorized = 1;
+  int64 project_id = 2;
+}

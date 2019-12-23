@@ -1,0 +1,122 @@
+syntax = "proto3";
+package fireblaze.vault.v1;
+//option go_package = "code.fireblaze.io/fb/spark;vault";
+option java_package = "io.fireblaze.vault";
+option java_outer_classname = "FireblazeVault";
+option java_multiple_files = true;
+option csharp_namespace = "Fireblaze.Vault.V1";
+option php_namespace = "Fireblaze\\Vault\\V1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+//import "validate/validate.proto";
+
+service VaultPII {
+  rpc PutPII (PutPIIRequest) returns (PutPIIResponse) {
+    option (google.api.http) = {
+      post: "/v1/pii"
+      body: "*"
+    };
+  }
+
+  rpc GetPII (GetPIIRequest) returns (GetPIIResponse) {
+    option (google.api.http) = {
+      get: "/v1/pii/{token}"
+    };
+  }
+
+  rpc DelPII (DelPIIRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/pii/{token}"
+    };
+  }
+
+  rpc PutPIIImage (ImageRequest) returns (ImageResponse) {
+    option (google.api.http) = {
+      post: "/v1/pii/image"
+      body: "*" // base64 image data
+    };
+  }
+
+}
+
+message PutPIIRequest {
+  DocumentType type = 1;
+  string full_name = 2;
+  string birth_date = 3;
+  string number = 4;
+  string issued_by = 5;
+  google.protobuf.Timestamp issued_on = 6;
+  google.protobuf.Timestamp expires_on = 7;
+
+  Address address = 9;
+
+  message Address {
+    string street = 1;
+    string city = 2;
+    string state = 3;
+    string country = 4;
+    string postcode = 5;
+  }
+
+  bool background_check = 8;
+
+  // does this customer pass KYC?
+  bool approved = 10;
+  // if customer doesn't pass KYC, provide a reason.
+  string reason = 11;
+
+  enum DocumentType {
+    PASSPORT = 0;
+    NATIONAL_ID = 1;
+    DRIVING_LICENSE = 2;
+    BIRTH_CERTIFICATE = 3;
+    //    GOOD_STANDING = 4;
+    //    PROOF_OF_ADDRESS = 5;
+    //    INCORPORATION = 6;
+  }
+}
+
+message PutPIIResponse {
+  string token = 1;
+  string hash = 2;
+  string last_four = 3;
+  string request_ip = 4;
+  string user_agent = 5;
+  BackgroundCheck background_check = 6;
+
+  message BackgroundCheck {
+    bool passed = 1;
+  }
+}
+
+message GetPIIRequest {
+  string token = 1;
+}
+
+message GetPIIResponse {
+}
+
+message DelPIIRequest {
+  string token = 1;
+}
+
+message ImageRequest {
+  Format format = 1;
+  string country = 2;
+  string base64_data = 3;
+  // useful to reference your CRM/BO/SF.
+  string foreign_key = 4;
+
+  enum Format {
+    PNG = 0;
+    JPG = 1;
+    PDF = 3;
+    GIF = 4;
+  }
+}
+
+message ImageResponse {
+  string token = 1;
+}

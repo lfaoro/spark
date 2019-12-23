@@ -1,0 +1,13 @@
+proto/
+ent/
+!ent/schema/
+
+ideas/
+.idea
+.vscode
+.env
+
+.DS_Store
+gin-bin
+
+vendor/
