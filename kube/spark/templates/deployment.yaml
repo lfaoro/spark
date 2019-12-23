@@ -27,18 +27,17 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-              - name: GCP_PROJECTID
-                value: "fireblaze"
-              - name: GCP_LOCATIONID
-                value: "europe-west3"
-              - name: DB_CONNECTION
-                value: "host=10.105.0.3 port=5432 user=vault dbname=vault password=develop sslmode=disable"
-              - name: FB_AUTH_HOST
-                value: "vault-user:50052"
+          envFrom:
+              - configMapRef:
+                  name: env-configmap
+              - secretRef:
+                  name: env-secrets
           ports:
             - name: http
               containerPort: 3001
+              protocol: TCP
+            - name: grpc
+              containerPort: 50052
               protocol: TCP
           livenessProbe:
             httpGet:
