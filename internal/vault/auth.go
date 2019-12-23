@@ -39,10 +39,10 @@ func (s Server) authFunc(ctx context.Context) (context.Context, error) {
 	if err != nil {
 		if status.Code(err) == codes.Unavailable {
 			log.Println(err)
-			const errUnavailable = "authorization service unavailable, try again in a few seconds"
-			return nil, status.Errorf(status.Code(err), "failed to authorize: %v", errUnavailable)
+			const errUnavailable = "failed to contact authorization service, try again in a few seconds"
+			return nil, status.Errorf(status.Code(err), errUnavailable)
 		}
-		return nil, status.Errorf(codes.Unauthenticated, "failed to authorize: %v", err)
+		return nil, err
 	}
 
 	grpc_ctxtags.Extract(ctx).Set("auth.sub", res.ProjectId)

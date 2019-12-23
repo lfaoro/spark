@@ -11,14 +11,6 @@ import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 
 service User {
-  // Returns app health status.
-  rpc HealthCheck (google.protobuf.Empty) returns (google.protobuf.Empty) {
-    option (google.api.http) = {
-       get: "/v1/user/health"
-    };
-  }
-
-
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {
     option (google.api.http) = {
       post: "/v1/user"
@@ -48,6 +40,12 @@ service User {
   //    };
   //  }
 
+  // Returns app health status.
+  rpc HealthCheck (google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+       get: "/v1/user/health"
+    };
+  }
 }
 
 message CreateUserRequest {

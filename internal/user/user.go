@@ -69,7 +69,7 @@ func (s Server) CreateUser(ctx context.Context, r *pb.CreateUserRequest) (*pb.Cr
 func (s Server) AuthUser(ctx context.Context, r *pb.AuthUserRequest) (*pb.AuthUserResponse, error) {
 	key := r.GetKey()
 	if key == "" {
-		return nil, status.Errorf(codes.Unauthenticated,
+		return nil, status.Errorf(codes.FailedPrecondition,
 			"failed to authenticate with empty key")
 	}
 
@@ -83,9 +83,9 @@ func (s Server) AuthUser(ctx context.Context, r *pb.AuthUserRequest) (*pb.AuthUs
 			"failed to authorize: %v", err)
 	}
 
-	if project.Disabled == true {
+	if project.Disabled {
 		return nil, status.Errorf(codes.PermissionDenied,
-			"authorized but disabled project %v with ID %v", project.Name, project.ID)
+			"project %v with ID %v is disabled", project.Name, project.ID)
 	}
 
 	return &pb.AuthUserResponse{
