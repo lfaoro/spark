@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"google.golang.org/grpc/connectivity"
 
 	"github.com/lfaoro/spark/pkg/iin"
 )
@@ -28,6 +29,16 @@ func New(key string) iin.Service {
 		endpoint: "https://lookup.binlist.net",
 		key:      key,
 	}
+}
+func (b BinList) State() connectivity.State {
+	res, err := http.Get(b.endpoint)
+	if err != nil {
+		return connectivity.Shutdown
+	}
+	if res.StatusCode > 299 {
+		return connectivity.Shutdown
+	}
+	return connectivity.Ready
 }
 
 func (b BinList) Lookup(number string) (*iin.CardMetadata, error) {

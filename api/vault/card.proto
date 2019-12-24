@@ -253,10 +253,10 @@ message Risk {
 
 message HealthCheckResponse {
   bool database = 1;
-  bool kms = 2;
+  string kms = 2;
   bool mpi = 3;
   bool risk = 4;
-  bool iin = 5;
+  string iin = 5;
 }
 
 enum SERVICE {

@@ -7,6 +7,10 @@
 // ref: https://en.wikipedia.org/wiki/Payment_card_number#Issuer_identification_number_.28IIN.29
 package iin
 
+import (
+	"google.golang.org/grpc/connectivity"
+)
+
 type CardMetadata struct {
 	Issuer            string
 	IssuerURL         string
@@ -29,4 +33,5 @@ type CardMetadata struct {
 
 type Service interface {
 	Lookup(s string) (*CardMetadata, error)
+	State() connectivity.State
 }

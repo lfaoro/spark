@@ -11,6 +11,7 @@ import (
 
 	gcpkms "cloud.google.com/go/kms/apiv1"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"google.golang.org/grpc/connectivity"
 
 	"github.com/pkg/errors"
 	"google.golang.org/api/iterator"
@@ -84,6 +85,10 @@ func (c GCPKMS) Decrypt(ciphertext []byte) ([]byte, error) {
 		return nil, errors.Wrap(err, "failed to decrypt ciphertext")
 	}
 	return res.Plaintext, nil
+}
+
+func (c GCPKMS) State() connectivity.State {
+	return c.client.Connection().GetState()
 }
 
 func (c *GCPKMS) setupKeys() {
