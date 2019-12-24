@@ -18,15 +18,16 @@ func (s Server) HealthCheck(context.Context, *empty.Empty) (*empty.Empty, error)
 }
 
 func (s Server) HealthCheckVerbose(ctx context.Context, empty *empty.Empty) (*pb.HealthCheckResponse, error) {
-	var state string
+	var kmsState string
 	if kms, ok := s.kms.(*gcpkms.GCPKMS); ok {
-		state = kms.State().String()
+		kmsState = kms.State().String()
 	} else {
 		log.Println("vault: unable to get KMS state")
 	}
+
 	return &pb.HealthCheckResponse{
 		Database: true,
-		Kms:      state,
+		Kms:      kmsState,
 		Mpi:      true,
 		Risk:     true,
 		Iin:      s.iin.State().String(),
