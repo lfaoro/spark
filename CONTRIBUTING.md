@@ -17,7 +17,7 @@ Please don't commit generated code. Maintain .gitignore accordingly.
 ## Folder structure
 `proto/` contains the protobuf specification and generated code.
 
-`ent/` contains db `schema/` specification, the generated code lives in multiple locations inside the `ent/` folder.
+`ent/schema` contains db the specification, the generated code lives in multiple locations inside the `ent/` folder.
 
 `internal/` contains business logic inherent only to this project.  
 

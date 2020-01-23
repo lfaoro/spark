@@ -28,7 +28,7 @@ var (
 	grpcPort = flag.String("grpcPort", ":50051", "host & port the grpc server listens on.")
 	httpPort = flag.String("httpPort", ":3001", "host & port the http server listens on.")
 	// use during development only, enforces database migrations.
-	debugFlag = flag.Bool("debug", true, "prints debug logs.")
+	debugFlag = flag.Bool("debug", false, "prints debug logs.")
 )
 
 func main() {

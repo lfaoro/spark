@@ -28,8 +28,8 @@ func (s Server) HealthCheckVerbose(ctx context.Context, empty *empty.Empty) (*pb
 	return &pb.HealthCheckResponse{
 		Database: true,
 		Kms:      kmsState,
-		Mpi:      true,
-		Risk:     true,
+		Mpi:      false,
+		Risk:     false,
 		Iin:      s.iin.State().String(),
 	}, nil
 }
